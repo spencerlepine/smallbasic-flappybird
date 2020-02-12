@@ -1,7 +1,8 @@
 GraphicsWindow.Show()
 GraphicsWindow.Title = ("Flappy Bird")
 
-'Made by: Spencer Lepine
+'Recreated by: Spencer Lepine
+'Original game designed by Dong Nguyen
 'Started on 05/12/2019 on Finished on 15/12/2019
 
 '===============================================================
@@ -18,42 +19,44 @@ Sub setVariables
   GraphicsWindow.BackgroundColor = "#71C5CF"
   GraphicsWindow.FontSize = 60
   GraphicsWindow.FontName = "Arial"
-
-  backgroundFile = Program.Directory + "\Assests\background.jpg"
-  birdFile = Program.Directory + "\Assests\b.png"
-  pipeFile = Program.Directory + "\Assests\pipe.png"
-  pipeEndFile = Program.Directory + "\Assests\pipeend.png"
-
-  birdMidFile = Program.Directory + "\Assests\birdmid.png"
-  birdUpFile = Program.Directory + "\Assests\birdup.png"
-  birdDownFile = Program.Directory + "\Assests\birddown.png"
-
-  grassFile = Program.Directory + "\Assests\grass.png"
-
-  'jumpFile = Program.Directory + "\Assests\wing.wav"
-  'swooshFile = Program.Directory + "\Assests\swooshing.wav"
-  'pointFile = Program.Directory + "\Assests\point.wav"
-  'dieFile = Program.Directory + "\Assests\die.wav"
-  'hitFile = Program.Directory + "\Assests\hit.wav"
-
+  
+  'Set up images
+  backgroundFile = Program.Directory + "\Assets\background.jpg"
+  backgroundImg = ImageList.LoadImage(backgroundFile)
+  birdFile = Program.Directory + "\Assets\b.png"
+  birdImg = ImageList.LoadImage(birdFile)
+  pipeFile = Program.Directory + "\Assets\pipe.png"
+  pipeImg = ImageList.LoadImage(pipeFile)
+  pipeEndFile = Program.Directory + "\Assets\pipeend.png"
+  pipeEndImg = ImageList.LoadImage(pipeEndFile)
+  birdMidFile = Program.Directory + "\Assets\birdmid.png"
+  birdMidImg = ImageList.LoadImage(birdMidFile)
+  birdUpFile = Program.Directory + "\Assets\birdup.png"
+  birdUpImg = ImageList.LoadImage(birdUpFile)
+  birdDownFile = Program.Directory + "\Assets\birddown.png"
+  birdDownImg = ImageList.LoadImage(birdDownFile)
+  grassFile = Program.Directory + "\Assets\grass.png"
+  grassImg = ImageList.LoadImage(grassFile)
+  
+  'Set up game variables
   screenMid = GraphicsWindow.Height/2
   marginBottom = 140
   puaseGame = "True"
   score = 0
-
-  ballSize = 58
-  ballX = 130
-  ballY = 375
-
-  hitBoxH = ballSize
-  hitBoxW = ballSize+25
-  hitBoxX = ballX
-  hitBoxY = ballY
-
+  
   objVelocity = 0
   gravityForce = 2.5
   objAcceleration = gravityForce
   jumpForce = 20
+  
+  birdSize = 58
+  birdX = 130
+  birdY = 375
+
+  hitBoxH = birdSize
+  hitBoxW = birdSize+25
+  hitBoxX = birdX
+  hitBoxY = birdY
 
   pipe_targetSpan = 215
   pipe_Width = 110
@@ -70,19 +73,7 @@ Sub setVariables
   difficulty[1] = 100
   difficulty[2] = 230
 
-  backgroundImg = ImageList.LoadImage(backgroundFile)
-  birdImg = ImageList.LoadImage(birdFile)
-  pipeImg = ImageList.LoadImage(pipeFile)
-  pipeEndImg = ImageList.LoadImage(pipeEndFile)
-
-  birdMidImg = ImageList.LoadImage(birdMidFile)
-  birdUpImg = ImageList.LoadImage(birdUpFile)
-  birdDownImg = ImageList.LoadImage(birdDownFile)
-
-  grassImg = ImageList.LoadImage(grassFile)
-
   'Set up the pipe arrays
-
   GraphicsWindow.BrushColor = "#74BF2E"
   GraphicsWindow.PenColor = "#533646"
 
@@ -116,7 +107,7 @@ Sub setVariables
   Grass[3]["x"] =Grass[2]["x"] + grassWidth
   Grass[3]["grassShape"] = Shapes.AddImage(grassImg)
   
-  'Set up the Bird Shapes
+  'Set up the Bird shape
   GraphicsWindow.BrushColor = "#E2BC41"
   GraphicsWindow.PenColor = "#533646"
   Bird = Shapes.AddImage(birdImg)
@@ -128,19 +119,19 @@ Sub setVariables
   birdDownShape = Shapes.AddImage(birdDownImg)
   Shapes.HideShape(birdDownShape)
   
-  'Set up the Hitbox Shapes
+  'Set up the Hitbox shape
   GraphicsWindow.BrushColor = "#FF0000"
   GraphicsWindow.PenColor = "#533646"
   Hitbox = Shapes.AddRectangle(hitBoxW, hitBoxH)
   Shapes.HideShape(Hitbox)
   Shapes.SetOpacity(Hitbox, 10)
   
-  'Set up the Score Shapes
+  'Set up the Score Shape
   GraphicsWindow.BrushColor = "Black"
   scoreShape = Shapes.AddText(score)
   Shapes.Move(scoreShape, GraphicsWindow.Width/2, 850)
 
-  'Draw dirt
+  'Set up the Dirt Shape
   GraphicsWindow.BrushColor = "#E2BC41"
   GraphicsWindow.PenColor = "#E2BC41"
   dirt = Shapes.AddRectangle(GraphicsWindow.Width, GraphicsWindow.Height - marginBottom)
@@ -152,10 +143,7 @@ EndSub
 
 setVariables()
 
-'===============================================================
-
 'Set up the initial random pipe target
-
 Sub initialRandom
   
   min = -100
@@ -165,10 +153,7 @@ Sub initialRandom
 
 EndSub
 
-'===============================================================
-
-'A coin-flip function to assist the random pipe target
-
+'A coin-flip function to randomize the center of top and bottom pipes
 Sub randomUpDown
   
   interval = 1
@@ -188,10 +173,7 @@ Sub randomUpDown
   
 EndSub
 
-'===============================================================
-
-'A function to regenerate a pipe target if it is off of the screen
-
+'Regenerate a pipe target if it is off of the screen
 Sub testGeneration1
   
   Pipe[1]["target"] = Pipe[2]["target"] + randomGeneraton
@@ -212,10 +194,7 @@ Sub testGeneration1
    
  EndSub
  
-'===============================================================
-
-'A function to regenerate a pipe target if it is off of the screen
-
+'Regenerate a pipe target if it is off of the screen
 Sub testGeneration2
   
   Pipe[2]["target"] = Pipe[1]["target"] + randomGeneraton
@@ -236,10 +215,7 @@ Sub testGeneration2
    
  EndSub
 
-'===============================================================
-
-'Scroll the array of pipes and determine new random targets
-
+'Move the pipes and determine a new random target
 Sub updatePipes
   
   For i = 1 To 2
@@ -278,11 +254,8 @@ Sub updatePipes
   EndFor
     
 EndSub
-  
-'===============================================================
 
-'Scroll the array of grass
-
+'Move the grass
 Sub updateGrass
   
   For i = 1 To grassLength
@@ -314,18 +287,16 @@ Sub updateGrass
   
 EndSub
 
-'===============================================================
-
 Shapes.Move(scoreShape, GraphicsWindow.Width/2, 50)
-  
+
+'Update the text of the Score object
 Sub updateScore
   
   Shapes.SetText(scoreShape, score)
   
 EndSub
 
-'===============================================================
-
+'Determine if the bird is touching a pipe
 Sub testForCollision
     
   For i = 1 To 2
@@ -334,10 +305,10 @@ Sub testForCollision
       
       If hitBoxY - hitBoxH/4 < 0 + Pipe[i]["topHeight"] Then
       
-        Shapes.Move(Bird, ballX, ballY)
-        Shapes.Move(birdMidShape, ballX, ballY)
-        Shapes.Move(birdUpShape, ballX, ballY)
-        Shapes.Move(birdDownShape, ballX, ballY)
+        Shapes.Move(Bird, birdX, birdY)
+        Shapes.Move(birdMidShape, birdX, birdY)
+        Shapes.Move(birdUpShape, birdX, birdY)
+        Shapes.Move(birdDownShape, birdX, birdY)
         GraphicsWindow.ShowMessage("Score: " + score, "You died :(")
         Program.End()
         
@@ -345,10 +316,10 @@ Sub testForCollision
     
       If hitBoxY + hitBoxH > (GraphicsWindow.Height - marginBottom) - Pipe[i]["botHeight"] Then
       
-        Shapes.Move(Bird, ballX, ballY)
-        Shapes.Move(birdMidShape, ballX, ballY)
-        Shapes.Move(birdUpShape, ballX, ballY)
-        Shapes.Move(birdDownShape, ballX, ballY)
+        Shapes.Move(Bird, birdX, birdY)
+        Shapes.Move(birdMidShape, birdX, birdY)
+        Shapes.Move(birdUpShape, birdX, birdY)
+        Shapes.Move(birdDownShape, birdX, birdY)
         GraphicsWindow.ShowMessage("Score: " + score, "You died :(")
         Program.End()
         
@@ -366,42 +337,40 @@ Sub testForCollision
   
 EndSub
 
-'===============================================================
-
+'Animate and move the bird
 Sub updateBird
   
   changeBird()
   testForCollision()
   
-  If ballY > GraphicsWindow.Height - (ballSize) - marginBottom Then
+  If birdY > GraphicsWindow.Height - (birdSize) - marginBottom Then
     
-    ballY = GraphicsWindow.Height - (ballSize) - marginBottom
-    hitBoxY = GraphicsWindow.Height - (ballSize) - marginBottom
+    birdY = GraphicsWindow.Height - (birdSize) - marginBottom
+    hitBoxY = GraphicsWindow.Height - (birdSize) - marginBottom
     
   EndIf
   
   objVelocity = objVelocity + objAcceleration
   
-  Shapes.Move(Bird, ballX, ballY)
+  Shapes.Move(Bird, birdX, birdY)
 
-  Shapes.Move(birdMidShape, ballX, ballY)
-  Shapes.Move(birdUpShape, ballX, ballY)
-  Shapes.Move(birdDownShape, ballX, ballY)
+  Shapes.Move(birdMidShape, birdX, birdY)
+  Shapes.Move(birdUpShape, birdX, birdY)
+  Shapes.Move(birdDownShape, birdX, birdY)
   
   Shapes.Move(Hitbox, hitBoxX, hitBoxY)
   
-  ballY = ballY + objVelocity
-  hitBoxX = ballX
-  hitBoxY = ballY
+  birdY = birdY + objVelocity
+  hitBoxX = birdX
+  hitBoxY = birdY
 
 EndSub
 
-GraphicsWindow.KeyUp = jumpBall
+GraphicsWindow.KeyUp = birdJump
 GraphicsWindow.MouseUp= mouseUp
 
-'===============================================================
-
-Sub jumpBall
+'Make the bird jump
+Sub birdJump
   
   whichKey = GraphicsWindow.LastKey
   
@@ -415,6 +384,7 @@ Sub jumpBall
  
 EndSub
 
+'Make the bird jump if the screen is clicked
 Sub mouseUp
   
     objVelocity = -jumpForce
@@ -423,8 +393,6 @@ Sub mouseUp
     
 EndSub
   
-'===============================================================
-
 Sub initializeGraphics
   
   GraphicsWindow.DrawImage(backgroundImg, 0, 0)
@@ -450,11 +418,11 @@ Sub initializeGraphics
     
   EndFor
   
-  Shapes.Move(Bird, ballX, ballY)
+  Shapes.Move(Bird, birdX, birdY)
   
-  Shapes.Move(birdMidShape, ballX, ballY)
-  Shapes.Move(birdUpShape, ballX, ballY)
-  Shapes.Move(birdDownShape, ballX, ballY)
+  Shapes.Move(birdMidShape, birdX, birdY)
+  Shapes.Move(birdUpShape, birdX, birdY)
+  Shapes.Move(birdDownShape, birdX, birdY)
   
   Shapes.Move(Hitbox, hitBoxX, hitBoxY)
   
@@ -462,18 +430,17 @@ Sub initializeGraphics
   
   Shapes.Move(dirt, 0, GraphicsWindow.Height - marginBottom + ImageList.GetHeightOfImage(grassImg))
   
-  overlayFile = Program.Directory + "\Assests\start.png"
+  overlayFile = Program.Directory + "\Assets\start.png"
   overlayImg = Shapes.AddImage(overlayFile)
   
 EndSub
 
 initializeGraphics()
   
-'===============================================================
-  
 spriteCounter = 0
 
-Sub changeBird'FIX alternating
+'Animate and change image of bird Sprite
+Sub changeBird
   
   If objVelocity < 90 And objVelocity > - 45 Then
   'Shapes.Rotate(birdUpShape, objVelocity)  
@@ -517,8 +484,7 @@ Sub changeBird'FIX alternating
  
 EndSub
 
-'===============================================================  
-
+'Attempted to add puase feature
 While puaseGame = "True"
   
   Program.Delay(50)
@@ -528,8 +494,7 @@ EndWhile
 puaseGame = "False"
 Shapes.Remove(overlayImg)
   
-'===============================================================
-  
+'Run the game  
 While puaseGame = "False"
   
   updateBird()
