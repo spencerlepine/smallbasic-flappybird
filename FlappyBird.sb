@@ -1,0 +1,541 @@
+GraphicsWindow.Show()
+GraphicsWindow.Title = ("Flappy Bird")
+
+'Made by: Spencer Lepine
+'Started on 05/12/2019 on Finished on 15/12/2019
+
+'===============================================================
+
+'Set the variables
+
+Sub setVariables
+  
+  GraphicsWindow.PenWidth = 3
+  GraphicsWindow.Width = 640
+  GraphicsWindow.Height = 960
+  GraphicsWindow.Top = 0
+  GraphicsWindow.Left = Desktop.Width/2 - GraphicsWindow.Width/2
+  GraphicsWindow.BackgroundColor = "#71C5CF"
+  GraphicsWindow.FontSize = 60
+  GraphicsWindow.FontName = "Arial"
+
+  backgroundFile = Program.Directory + "\Assests\background.jpg"
+  birdFile = Program.Directory + "\Assests\b.png"
+  pipeFile = Program.Directory + "\Assests\pipe.png"
+  pipeEndFile = Program.Directory + "\Assests\pipeend.png"
+
+  birdMidFile = Program.Directory + "\Assests\birdmid.png"
+  birdUpFile = Program.Directory + "\Assests\birdup.png"
+  birdDownFile = Program.Directory + "\Assests\birddown.png"
+
+  grassFile = Program.Directory + "\Assests\grass.png"
+
+  'jumpFile = Program.Directory + "\Assests\wing.wav"
+  'swooshFile = Program.Directory + "\Assests\swooshing.wav"
+  'pointFile = Program.Directory + "\Assests\point.wav"
+  'dieFile = Program.Directory + "\Assests\die.wav"
+  'hitFile = Program.Directory + "\Assests\hit.wav"
+
+  screenMid = GraphicsWindow.Height/2
+  marginBottom = 140
+  puaseGame = "True"
+  score = 0
+
+  ballSize = 58
+  ballX = 130
+  ballY = 375
+
+  hitBoxH = ballSize
+  hitBoxW = ballSize+25
+  hitBoxX = ballX
+  hitBoxY = ballY
+
+  objVelocity = 0
+  gravityForce = 2.5
+  objAcceleration = gravityForce
+  jumpForce = 20
+
+  pipe_targetSpan = 215
+  pipe_Width = 110
+  pipe_Gap = 280
+  pipe_Min = 115
+  pipe_Velocity = -10
+
+  grassLength = 3
+  grassWidth = 363
+
+  endWidth = 8
+  endHeight = 53
+
+  difficulty[1] = 100
+  difficulty[2] = 230
+
+  backgroundImg = ImageList.LoadImage(backgroundFile)
+  birdImg = ImageList.LoadImage(birdFile)
+  pipeImg = ImageList.LoadImage(pipeFile)
+  pipeEndImg = ImageList.LoadImage(pipeEndFile)
+
+  birdMidImg = ImageList.LoadImage(birdMidFile)
+  birdUpImg = ImageList.LoadImage(birdUpFile)
+  birdDownImg = ImageList.LoadImage(birdDownFile)
+
+  grassImg = ImageList.LoadImage(grassFile)
+
+  'Set up the pipe arrays
+
+  GraphicsWindow.BrushColor = "#74BF2E"
+  GraphicsWindow.PenColor = "#533646"
+
+  initialRandom()
+  Pipe[1]["startX"] = GraphicsWindow.Width + endWidth/2
+  Pipe[1]["target"] = startRanGen
+  Pipe[1]["topHeight"] = (0 - ((Pipe[1]["target"] - pipe_targetSpan/2) + screenMid)) * -1
+  Pipe[1]["botHeight"] = (((Pipe[1]["target"] + pipe_targetSpan/2) + screenMid) - (GraphicsWindow.Height - marginBottom)) * -1
+  Pipe[1]["topShape"] = Shapes.AddImage(pipeImg)
+  Pipe[1]["botShape"] = Shapes.AddImage(pipeImg)
+
+  randomUpDown()
+  Pipe[2]["startX"] = Pipe[1]["startX"] + pipe_Width + pipe_Gap
+  Pipe[2]["target"] = -startRanGen
+  Pipe[2]["topHeight"] =  (0 - ((Pipe[2]["target"] - pipe_targetSpan/2) + screenMid)) * -1
+  Pipe[2]["botHeight"] =  (((Pipe[2]["target"] + pipe_targetSpan/2) + screenMid) - (GraphicsWindow.Height - marginBottom)) * -1
+  Pipe[2]["topShape"] = Shapes.AddImage(pipeImg)
+  Pipe[2]["botShape"] = Shapes.AddImage(pipeImg)
+
+  Pipe[1]["endtop"] = Shapes.AddImage(pipeEndImg)
+  Pipe[1]["endbot"] = Shapes.AddImage(pipeEndImg)
+
+  Pipe[2]["endtop"] = Shapes.AddImage(pipeEndImg)
+  Pipe[2]["endbot"] = Shapes.AddImage(pipeEndImg)
+  
+  'Set up the grass arrays
+  Grass[1]["x"] = 0
+  Grass[1]["grassShape"] = Shapes.AddImage(grassImg)
+  Grass[2]["x"] = Grass[1]["x"] + grassWidth
+  Grass[2]["grassShape"] = Shapes.AddImage(grassImg)
+  Grass[3]["x"] =Grass[2]["x"] + grassWidth
+  Grass[3]["grassShape"] = Shapes.AddImage(grassImg)
+  
+  'Set up the Bird Shapes
+  GraphicsWindow.BrushColor = "#E2BC41"
+  GraphicsWindow.PenColor = "#533646"
+  Bird = Shapes.AddImage(birdImg)
+
+  birdMidShape = Shapes.AddImage(birdMidImg)
+  Shapes.HideShape(birdMidShape)
+  birdUpShape = Shapes.AddImage(birdUpImg)
+  Shapes.HideShape(birdUpShape)
+  birdDownShape = Shapes.AddImage(birdDownImg)
+  Shapes.HideShape(birdDownShape)
+  
+  'Set up the Hitbox Shapes
+  GraphicsWindow.BrushColor = "#FF0000"
+  GraphicsWindow.PenColor = "#533646"
+  Hitbox = Shapes.AddRectangle(hitBoxW, hitBoxH)
+  Shapes.HideShape(Hitbox)
+  Shapes.SetOpacity(Hitbox, 10)
+  
+  'Set up the Score Shapes
+  GraphicsWindow.BrushColor = "Black"
+  scoreShape = Shapes.AddText(score)
+  Shapes.Move(scoreShape, GraphicsWindow.Width/2, 850)
+
+  'Draw dirt
+  GraphicsWindow.BrushColor = "#E2BC41"
+  GraphicsWindow.PenColor = "#E2BC41"
+  dirt = Shapes.AddRectangle(GraphicsWindow.Width, GraphicsWindow.Height - marginBottom)
+
+  GraphicsWindow.BrushColor = "#78BE37"
+  GraphicsWindow.PenColor = "#533646"
+  
+EndSub
+
+setVariables()
+
+'===============================================================
+
+'Set up the initial random pipe target
+
+Sub initialRandom
+  
+  min = -100
+  max = 100
+  interval = 1
+  startRanGen = min + (Math.GetRandomNumber(1 + (max - min) / interval) - 1) * interval
+
+EndSub
+
+'===============================================================
+
+'A coin-flip function to assist the random pipe target
+
+Sub randomUpDown
+  
+  interval = 1
+  down = 0
+  up = 1
+  upOrDown = down + (Math.GetRandomNumber(1 + (up - down) / interval) - 1) * interval
+ 
+  min2 = difficulty[1]
+  max2 = difficulty[2] 'difficulty
+  randomGeneraton = min2 + (Math.GetRandomNumber(1 + (max2 - min2) / interval) - 1) * interval
+  
+  If upOrDown = 0 Then
+    
+    randomGeneraton = randomGeneraton * -1
+    
+  EndIf
+  
+EndSub
+
+'===============================================================
+
+'A function to regenerate a pipe target if it is off of the screen
+
+Sub testGeneration1
+  
+  Pipe[1]["target"] = Pipe[2]["target"] + randomGeneraton
+  top = (0 - ((Pipe[1]["target"] - pipe_targetSpan/2) + screenMid)) * -1
+  bot = (((Pipe[1]["target"] + pipe_targetSpan/2) + screenMid) - (GraphicsWindow.Height - marginBottom)) * -1
+  
+  If top < pipe_Min Then
+     
+     randomUpDown()
+     testGeneration1()
+     
+   ElseIf bot < pipe_Min Then
+     
+     randomUpDown()
+     testGeneration1()
+     
+   EndIf
+   
+ EndSub
+ 
+'===============================================================
+
+'A function to regenerate a pipe target if it is off of the screen
+
+Sub testGeneration2
+  
+  Pipe[2]["target"] = Pipe[1]["target"] + randomGeneraton
+  top = (0 - ((Pipe[2]["target"] - pipe_targetSpan/2) + screenMid)) * -1
+  bot = (((Pipe[2]["target"] + pipe_targetSpan/2) + screenMid) - (GraphicsWindow.Height - marginBottom)) * -1
+  
+  If top < pipe_Min Then
+     
+     randomUpDown()
+     testGeneration2()
+     
+   ElseIf bot < pipe_Min Then
+     
+     randomUpDown()
+     testGeneration2()
+     
+   EndIf
+   
+ EndSub
+
+'===============================================================
+
+'Scroll the array of pipes and determine new random targets
+
+Sub updatePipes
+  
+  For i = 1 To 2
+  
+    If Pipe[i]["startX"] < 0 - pipe_Width Then
+      
+      randomUpDown()
+      
+      If i = 2 Then
+        
+        testGeneration2() 
+        Pipe[i]["target"] = Pipe[1]["target"] + randomGeneraton
+        Pipe[i]["startX"] = (Pipe[1]["startX"] + pipe_Width + pipe_Gap)
+        
+      ElseIf i = 1 Then
+        
+        testGeneration1() 
+        Pipe[i]["target"] = Pipe[2]["target"] + randomGeneraton
+        Pipe[i]["startX"] = (Pipe[2]["startX"] + pipe_Width + pipe_Gap)
+        
+      EndIf
+     
+      Pipe[i]["topHeight"] = (0 - ((Pipe[i]["target"] - pipe_targetSpan/2) + screenMid)) * -1
+      Pipe[i]["botHeight"] = (((Pipe[i]["target"] + pipe_targetSpan/2) + screenMid) - (GraphicsWindow.Height - marginBottom)) * -1
+      
+    EndIf
+      
+    Shapes.Move(Pipe[i]["topShape"], Pipe[i]["startX"], 0-(525-Pipe[i]["topHeight"]))'0-3
+    Shapes.Move(Pipe[i]["botShape"], Pipe[i]["startX"], (GraphicsWindow.Height - marginBottom) - Pipe[i]["botHeight"])']+3
+    
+    Shapes.Move(Pipe[i]["endtop"], Pipe[i]["startX"] - endWidth/2, Pipe[i]["topHeight"] - endHeight)
+    Shapes.Move(Pipe[i]["endbot"], Pipe[i]["startX"] - endWidth/2, (GraphicsWindow.Height - marginBottom) - Pipe[i]["botHeight"])
+    
+    Pipe[i]["startX"] = Pipe[i]["startX"] + pipe_Velocity
+    
+  EndFor
+    
+EndSub
+  
+'===============================================================
+
+'Scroll the array of grass
+
+Sub updateGrass
+  
+  For i = 1 To grassLength
+    
+    If Grass[i]["x"] < 0 - grassWidth Then
+      
+       If i = 3 Then
+        
+        Grass[i]["x"] = (Grass[2]["x"] + grassWidth)
+        
+      ElseIf i = 2 Then
+         
+        Grass[i]["x"] = (Grass[1]["x"] + grassWidth)
+        
+      ElseIf i = 1 Then
+        
+        Grass[i]["x"] = (Grass[3]["x"] + grassWidth)
+        
+      EndIf
+      
+      EndIf
+    
+    Shapes.Move(Grass[i]["grassShape"], Grass[i]["x"],  GraphicsWindow.Height - marginBottom)
+    
+    Grass[i]["x"] = Grass[i]["x"] + pipe_Velocity
+    
+    
+  EndFor
+  
+EndSub
+
+'===============================================================
+
+Shapes.Move(scoreShape, GraphicsWindow.Width/2, 50)
+  
+Sub updateScore
+  
+  Shapes.SetText(scoreShape, score)
+  
+EndSub
+
+'===============================================================
+
+Sub testForCollision
+    
+  For i = 1 To 2
+    
+    If hitBoxX + hitBoxW > Pipe[i]["startX"] And hitBoxX < Pipe[i]["startX"] + pipe_Width Then
+      
+      If hitBoxY - hitBoxH/4 < 0 + Pipe[i]["topHeight"] Then
+      
+        Shapes.Move(Bird, ballX, ballY)
+        Shapes.Move(birdMidShape, ballX, ballY)
+        Shapes.Move(birdUpShape, ballX, ballY)
+        Shapes.Move(birdDownShape, ballX, ballY)
+        GraphicsWindow.ShowMessage("Score: " + score, "You died :(")
+        Program.End()
+        
+      EndIf
+    
+      If hitBoxY + hitBoxH > (GraphicsWindow.Height - marginBottom) - Pipe[i]["botHeight"] Then
+      
+        Shapes.Move(Bird, ballX, ballY)
+        Shapes.Move(birdMidShape, ballX, ballY)
+        Shapes.Move(birdUpShape, ballX, ballY)
+        Shapes.Move(birdDownShape, ballX, ballY)
+        GraphicsWindow.ShowMessage("Score: " + score, "You died :(")
+        Program.End()
+        
+      EndIf
+   
+  EndIf
+ 
+     If Shapes.GetLeft(Pipe[i]["botShape"]) + pipe_Width/2 = 114 + pipe_Width/2 Then 'CHANGE THIS IF YOU CHANGE PIPE VEL
+
+        score = score + 1
+      
+      EndIf
+    
+  EndFor
+  
+EndSub
+
+'===============================================================
+
+Sub updateBird
+  
+  changeBird()
+  testForCollision()
+  
+  If ballY > GraphicsWindow.Height - (ballSize) - marginBottom Then
+    
+    ballY = GraphicsWindow.Height - (ballSize) - marginBottom
+    hitBoxY = GraphicsWindow.Height - (ballSize) - marginBottom
+    
+  EndIf
+  
+  objVelocity = objVelocity + objAcceleration
+  
+  Shapes.Move(Bird, ballX, ballY)
+
+  Shapes.Move(birdMidShape, ballX, ballY)
+  Shapes.Move(birdUpShape, ballX, ballY)
+  Shapes.Move(birdDownShape, ballX, ballY)
+  
+  Shapes.Move(Hitbox, hitBoxX, hitBoxY)
+  
+  ballY = ballY + objVelocity
+  hitBoxX = ballX
+  hitBoxY = ballY
+
+EndSub
+
+GraphicsWindow.KeyUp = jumpBall
+GraphicsWindow.MouseUp= mouseUp
+
+'===============================================================
+
+Sub jumpBall
+  
+  whichKey = GraphicsWindow.LastKey
+  
+  If whichKey = "Space" Then
+    
+    objVelocity = -jumpForce
+    puaseGame = "False"
+    facingdown = 0
+    
+  EndIf
+ 
+EndSub
+
+Sub mouseUp
+  
+    objVelocity = -jumpForce
+    puaseGame = "False"
+    facingdown = 0
+    
+EndSub
+  
+'===============================================================
+
+Sub initializeGraphics
+  
+  GraphicsWindow.DrawImage(backgroundImg, 0, 0)
+  
+  For i = 1 To 2
+    
+    Shapes.Move(Pipe[i]["endtop"], Pipe[i]["startX"] - endWidth/2, Pipe[i]["topHeight"] - endHeight)
+    Shapes.Move(Pipe[i]["endbot"], Pipe[i]["startX"] - endWidth/2, (GraphicsWindow.Height - marginBottom) - Pipe[i]["botHeight"])
+    
+    Shapes.Move(Pipe[i]["topShape"], Pipe[i]["startX"], 0-(525-Pipe[i]["topHeight"]))'0-3
+    Shapes.Move(Pipe[i]["botShape"], Pipe[i]["startX"],  Shapes.GetTop(Pipe[i]["endbot"]))']+3
+    
+  EndFor
+  
+  Shapes.Move(Pipe[1]["endtop"], Pipe[1]["startX"] - endWidth/2, Pipe[i]["topHeight"] - endHeight)
+  Shapes.Move(Pipe[1]["endbot"], Pipe[1]["startX"] - endWidth/2, (GraphicsWindow.Height - marginBottom) - Pipe[1]["botHeight"])
+  Shapes.Move(Pipe[2]["endtop"], Pipe[2]["startX"] - endWidth/2, Pipe[i]["topHeight"] - endHeight)
+  Shapes.Move(Pipe[2]["endbot"], Pipe[2]["startX"] - endWidth/2, (GraphicsWindow.Height - marginBottom) - Pipe[2]["botHeight"])
+  
+  For i = 1 To grassLength
+    
+    Shapes.Move(Grass[i]["grassShape"], Grass[i]["x"], GraphicsWindow.Height - marginBottom)
+    
+  EndFor
+  
+  Shapes.Move(Bird, ballX, ballY)
+  
+  Shapes.Move(birdMidShape, ballX, ballY)
+  Shapes.Move(birdUpShape, ballX, ballY)
+  Shapes.Move(birdDownShape, ballX, ballY)
+  
+  Shapes.Move(Hitbox, hitBoxX, hitBoxY)
+  
+  Shapes.ShowShape(birdMidShape)
+  
+  Shapes.Move(dirt, 0, GraphicsWindow.Height - marginBottom + ImageList.GetHeightOfImage(grassImg))
+  
+  overlayFile = Program.Directory + "\Assests\start.png"
+  overlayImg = Shapes.AddImage(overlayFile)
+  
+EndSub
+
+initializeGraphics()
+  
+'===============================================================
+  
+spriteCounter = 0
+
+Sub changeBird'FIX alternating
+  
+  If objVelocity < 90 And objVelocity > - 45 Then
+  'Shapes.Rotate(birdUpShape, objVelocity)  
+  'Shapes.Rotate(birdDownShape, objVelocity)
+  Shapes.Rotate(birdMidShape, objVelocity)
+  Shapes.Rotate(Bird, objVelocity)
+  EndIf
+  spriteCounter = spriteCounter + 1
+  
+  flapSpeed = 3
+  
+  If spriteCounter >= 0 And spriteCounter < flapSpeed Then
+    
+    Shapes.HideShape(birdMidShape)
+    Shapes.ShowShape(birdUpShape)
+    Shapes.HideShape(birdDownShape)
+    
+  EndIf
+    
+  If spriteCounter >= flapSpeed And spriteCounter < flapSpeed*2 Then
+    
+    Shapes.ShowShape(birdMidShape)
+    Shapes.HideShape(birdUpShape)
+    Shapes.HideShape(birdDownShape)
+    
+  EndIf
+    
+  If spriteCounter >= flapSpeed*2 And spriteCounter < flapSpeed*3 Then
+    
+    Shapes.HideShape(birdMidShape)
+    Shapes.HideShape(birdUpShape)
+    Shapes.ShowShape(birdDownShape)
+    
+  EndIf
+  
+  If spriteCounter >= flapSpeed*3 Then
+    
+    spriteCounter = 0
+    
+  EndIf
+ 
+EndSub
+
+'===============================================================  
+
+While puaseGame = "True"
+  
+  Program.Delay(50)
+  
+EndWhile
+
+puaseGame = "False"
+Shapes.Remove(overlayImg)
+  
+'===============================================================
+  
+While puaseGame = "False"
+  
+  updateBird()
+  updatePipes()
+  updateGrass()
+  updateScore()
+  Program.Delay(40)
+
+EndWhile
