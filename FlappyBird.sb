@@ -1,7 +1,7 @@
 GraphicsWindow.Show()
 GraphicsWindow.Title = ("Flappy Bird")
 
-'Recreated by: Spencer Lepine
+'Recreated by: https://github.com/Commander-Sloth
 'Original game designed by Dong Nguyen
 'Started on 05/12/2019 on Finished on 15/12/2019
 
